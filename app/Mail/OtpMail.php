@@ -1,14 +1,15 @@
 <?php
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Content;
-use Illuminate\Mail\Envelope;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OTPMail extends Mailable
+class OtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -29,8 +30,10 @@ class OTPMail extends Mailable
      */
     public function build()
     {
-        return $this->from('whether-underline@a6bgcr8h.mailosaur.net')
-            ->subject('O T P Mail')
-            ->view('Mail.otp', ['otp' => $this->otp]);
+        return $this
+            ->subject('OTP Mail')
+            ->view('Mail.otp', [
+                'otp' => $this->otp,
+            ]);
     }
 }

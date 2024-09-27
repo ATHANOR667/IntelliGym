@@ -48,14 +48,18 @@
             INTELLIGYM
         </text>
     </svg>
-    <h1>Réinitialisation de mot de passe</h1>
+    <h1>Demande De reset de mot de passe</h1>
 
     <p>Bonjour,</p>
 
-    <p>Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le lien ci-dessous pour procéder à la réinitialisation :</p>
+    <p>Nous avons reçu une demande de modification de mot de passe  votre part</p>
 
     <p>
-        <a class="btn" href="{{route('user.reset',['student'=>$student])}}">Réinitialiser le mot de passe</a>
+        votre OTP : <h2>{{$otp}}</h2>
+    </p>
+
+    <p>
+        Veuillez suivre ce lien  : <h2><a href="{{route('user.password_reset',['user' =>\Illuminate\Support\Facades\Crypt::encrypt($student->id)])}}">Reset</a> </h2>
     </p>
 
     <p>Si vous n'avez pas effectué cette demande, vous pouvez ignorer cet e-mail.</p>

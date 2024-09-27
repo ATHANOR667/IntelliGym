@@ -26,7 +26,8 @@ class PasswordResetRequest extends FormRequest
         return [
 
             //'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
-            'password' => ''
+            'otp' => ['required', 'digits:4'],  // L'OTP doit être exactement 4 chiffres
+            'password' => ['min:8']
         ];
     }
 

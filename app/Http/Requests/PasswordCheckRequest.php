@@ -3,13 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
 
-class StudentSigninRequest extends FormRequest
+class PasswordCheckRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Détermine si l'utilisateur est autorisé à effectuer cette requête.
      */
     public function authorize(): bool
     {
@@ -17,20 +15,21 @@ class StudentSigninRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Récupère les règles de validation qui s'appliquent à la requête.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-          // 'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
-            'password'=> '',
-            'matricule' => 'required'      ];
+
+            //'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
+            'password' => ['required','min:8']
+        ];
     }
 
     /**
-     * Handle a failed validation attempt.
+     * Gère une tentative de validation échouée.
      *
      * @param  \Illuminate\Contracts\Validation\Validator  $validator
      * @return void

@@ -1,11 +1,11 @@
 @extends('admin.form-base')
-@section('title', 'signin admin')
+@section('title', 'password reset')
 
 @section('content')
     <!-- formulaire inscription -->
     <div class="divinscrip connexion">
         <div class="titreinscriotion">
-            <h2>Inscription</h2>
+            <h2>Mise ajour du mot de passe </h2>
         </div>
 
 
@@ -13,9 +13,9 @@
             <div class="divinput">
                 @csrf
 
-                <!-- MATRICULE -->
-                <input type="text" name="matricule"    placeholder="matricule" value="{{@old('matricule')}}" class="input01" required>
-                @error('matricule')
+                <!-- OTP -->
+                <input type="text" name="otp"    placeholder="otp" value="{{@old('otp')}}" class="input01" required>
+                @error('otp')
                 <span>{{$message}}</span>
                 @enderror
 
@@ -33,10 +33,11 @@
 
         </form>
 
-    <!-- MESSAGE -->
-    @if(session('message'))
-        <div>
-            {{session('message')}}
-        </div>
-    @endif
+        <!-- MESSAGE -->
+        @if(session('message'))
+            <div>
+                {{session('message')}}
+            </div>
+        @endif
 @endsection
+

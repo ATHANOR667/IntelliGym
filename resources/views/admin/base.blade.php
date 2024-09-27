@@ -98,7 +98,21 @@
             </li>
 
             <li>
-                <a ><span class="icon"><i class="fi fi-ss-leave"></i></span><form class="formbtn" action="{{ route('user.logout') }}" method="POST">@csrf @method('DELETE')<button class="logoutbtn" type="submit">Logout</button></form>
+                <a  href="{{route('admin.list',['admin'=>$admin_key])}}" >
+                    <span class="icon"><i class="fi fi-sr-shopping-cart"></i></span>
+                    <span class="title">Liste des reservations</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="{{route('admin.profil',['admin'=>$admin_key])}}" >
+                    <span class="icon"><i class="fi fi-sr-user"></i></span>
+                    <span class="title">Profil</span>
+                </a>
+            </li>
+
+            <li>
+                <a ><span class="icon"><i class="fi fi-ss-leave"></i></span><form class="formbtn" action="{{ route('admin.logout') }}" method="POST">@csrf @method('DELETE')<button class="logoutbtn" type="submit">Logout</button></form>
                 </a>
 
             </li>

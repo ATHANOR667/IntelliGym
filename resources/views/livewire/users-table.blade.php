@@ -64,6 +64,7 @@
                             <tr>
                                 <td>
                                     @if($user->id == $editId)
+                                    {{--<livewire:users-update :admin="$admin" :user="$user" :column="$column"/>--}}
                                         <div>
                                             <form wire:submit="save">
                                                 <div wire:loading>
@@ -82,36 +83,36 @@
                                                 @if($column == 'id')
                                                     Le Champ id non modifiable
                                                 @elseif($column == 'matricule')
-                                                    <input type="text" name="matricule" wire:model.live="user.matricule" value="{{$user->matricule}}">
-                                                    @error('user.matricule')
+                                                    <input type="text" name="matricule" wire:model="matricule" value="{{$user->matricule}}">
+                                                    @error('matricule')
                                                     <span>{{$message}}</span>
                                                     @enderror
                                                     <button type="submit" class="btnre">Enregistrer</button>
                                                 @elseif($column == 'nom')
-                                                    <input type="text" name="nom" placeholder="nom"  wire:model.live="user.nom" value="{{$user->nom}}">
-                                                    @error('user.nom')
+                                                    <input type="text" name="nom" placeholder="nom"  wire:model="nom" value="{{$user->nom}}">
+                                                    @error('nom')
                                                     <span>{{$message}}</span>
                                                     @enderror
                                                     <button type="submit" class="btnre">Enregistrer</button>
                                                 @elseif($column == 'prenom')
-                                                    <input type="text" name="prenom" placeholder="prenom"  wire:model.live="user.prenom" value="{{$user->prenom}}">
-                                                    @error('user.prenom')
+                                                    <input type="text" name="prenom" placeholder="prenom"  wire:model="prenom" value="{{$user->prenom}}">
+                                                    @error('prenom')
                                                     <span>{{$message}}</span>
                                                     @enderror
                                                     <button type="submit" class="btnre">Enregistrer</button>
                                                 @elseif($column == 'date_naiss')
-                                                    <input type="date" name="date_naiss" placeholder="date_naiss"  wire:model.live="user.date_naiss" value="{{$user->date_naiss}}">
-                                                    @error('user.date_naiss')
+                                                    <input type="date" name="date_naiss" placeholder="date_naiss"  wire:model="date_naiss" value="{{$user->date_naiss}}">
+                                                    @error('date_naiss')
                                                     <span>{{$message}}</span>
                                                     @enderror
                                                     <button type="submit" class="btnre">Enregistrer</button>
                                                 @elseif($column == 'classe_id')
-                                                    <select  name="classe_id" placeholder="classe_id"  wire:model.live="user.classe_id" value="{{$classe->niveau.$classe->numero.$classe->specialite}}">
+                                                    <select  name="classe_id" placeholder="classe_id"  wire:model="classe_id" value="{{$classe->niveau.$classe->numero.$classe->specialite}}">
                                                         @foreach($classes as $classe)
                                                             <option value="{{$classe->id}}">{{ $classe->niveau.$classe->numero.$classe->specialite }}</option>
                                                         @endforeach
                                                     </select>
-                                                    @error('user.classe_id')
+                                                    @error('classe_id')
                                                     <span>{{$message}}</span>
                                                     @enderror
                                                     <button type="submit" class="btnre">Enregistrer</button>
@@ -126,7 +127,6 @@
                                                 @endif
                                             </form>
                                         </div>
-
                                     @endif
                                 </td>
                             </tr>

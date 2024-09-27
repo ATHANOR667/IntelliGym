@@ -16,33 +16,55 @@ class UsersTable extends Component
     use WithPagination;
 
     public $users;
+    public Admin $admin ;
     public Student $user;
     public Collection $classes;
     public string $classe;
-    public int $editId;
+    public $editId;
     public string $search;
     public string $column;
     public string $direction;
     public array $selection = [];
     public $admin_key;
 
-    protected $rules = [
-        'user.matricule' => 'required',
-        'user.classe_id' => 'required',
-        'user.nom' => 'required',
-        'user.prenom' => 'required',
-        'user.date_naiss' => 'date|before_or_equal:2008-12-31',
-        'user.sexe' => 'in:M,F',
-    ];
+   #[validate('required')]
+    public $matricule = '';
+
+    #[validate('required')]
+    public $classe_id = '';
+
+    #[validate('required')]
+    public $nom ='';
+
+    #[validate('required')]
+    public $prenom = '';
+
+    #[validate('required|date|before_or_equal:2008-12-31')]
+    public $date_naiss = '';
+
+    #[validate('required|in:M,F')]
+    public $sexe = '';
+
+    #[On('user-updated')] 
+    public function updatedUser()
+    {
+        $this->editId = 0 ;
+    }
+
 
     public function save()//
     {
        // dump($this->user);
-        $this->validate();
-        $this->user->save();
+        $this->user->update([
+            'classe_id' => $this->classe_id,
+            'matricule' => $this->matricule,
+            'nom' => $this->nom,
+            'prenom' => $this->prenom,
+            'date_naiss' => $this->date_naiss,
+            'sexe' => $this->sexe
+        ]);
         session()->flash('success', 'modification enregistree');
-        $this->editId = (int)0;
-        $this->render();
+        $this->mount($this->admin);
     }
 
 
@@ -52,7 +74,7 @@ class UsersTable extends Component
         $this->search = '';
         $this->column = 'nom';
         $this->direction = 'ASC';
-        $this->editId = (int)0;
+        //$this->editId = (int)0;
         $this->classes = (new Ecole())->classes_by_admin_ecole($admin->id);
 
     }
@@ -60,6 +82,7 @@ class UsersTable extends Component
     public function render()
     {
         $query = Student::query();
+        $query->whereIn('classe_id', array_column($this->classes->toArray(), 'id'));
         $query->where($this->column, 'LIKE', "%{$this->search}%");
         $query->orderBy($this->column, $this->direction);
         if (!empty($this->classe)) {
@@ -78,7 +101,7 @@ class UsersTable extends Component
     public function setClasse($class)
     {
         $this->classe = $class;
-        $this->editId = (int)0;
+        //$this->editId = (int)0;
        // $this->render();
     }
 
@@ -90,7 +113,9 @@ class UsersTable extends Component
         } else {
             $this->column = $col;
         }
-        $this->editId = (int)0;
+        $this->dispatch('column-updated', col: $col ); 
+
+        //$this->editId = (int)0;
         //$this->render();
     }
 
@@ -102,8 +127,20 @@ class UsersTable extends Component
     {
 
         $this->editId = (int)$id;
+
         $this->user = Student::find($id);
-        //$this->render();
+
+        $this->matricule = $this->user->matricule;
+ 
+        $this->classe_id = $this->user->classe_id;
+ 
+        $this->nom = $this->user->nom;
+
+        $this->prenom = $this->user->prenom;
+
+        $this->date_naiss = $this->user->date_naiss;
+
+        $this->sexe = $this->user->sexe;    
     }
 
 
@@ -115,7 +152,7 @@ class UsersTable extends Component
             $user = Student::find($id);
             if ($user) {
                 $user->delete();
-            }//        }
+            }
             $this->selection = [];
         }
 

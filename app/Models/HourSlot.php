@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Student;
+use App\Models\HourSlot;
+use App\Notifications\GetOutWaitListNotification;
 use Illuminate\Support\Facades\DB;
 
 class HourSlot extends Model
@@ -31,6 +33,81 @@ class HourSlot extends Model
         'campus_id'
 
     ];
+
+   public function wait_list_put_out()
+   {
+        // Définir les dates actuelles et de demain
+        $currentDate = Carbon::now()->format('Y-m-d');
+        $nextDate = Carbon::now()->addDay()->format('Y-m-d');
+        $days = [$currentDate,$nextDate];
+
+        //etudiant ayant une reservation en attente pour le  jour et le lendemain 
+        $student_on_wait_list = DB::table('hour_slot_student')
+            ->join('hour_slots','hour_slots.id','=','hour_slot_student.hour_slot_id')
+            ->where('hour_slot_student.attente','=',true)
+            ->distinct('hour_slot_student.student_id')
+            ->where(function($query) use ($currentDate, $nextDate) {
+                $query->where('hour_slots.date', '=', $currentDate)
+                    ->orWhere('hour_slots.date', '=', $nextDate);
+            })->pluck('hour_slot_student.student_id');
+
+
+        foreach($student_on_wait_list as $student){
+           
+
+            $query_campus  = DB::table('campuses')
+                ->join('ecoles','campuses.id','=','ecoles.campus_id')
+                ->join('classes','ecoles.id','=','classes.ecole_id')
+                ->join('students','students.classe_id','classes.id')
+                ->where('students.id','=', $student)
+                ->first(['campuses.capacite','campuses.id']);
+                
+
+
+
+            foreach ($days as $day) 
+            {
+                //reservation en attente  de l'etudiant (multiple)
+                $wait_list = DB::table('hour_slot_student')
+                    ->join('hour_slots', 'hour_slots.id', '=', 'hour_slot_student.hour_slot_id')
+                    ->where('hour_slot_student.student_id','=',$student)
+                    ->where('hour_slot_student.attente','=',true)
+                    ->where('hour_slots.date', '=', $day)
+                    ->where('hour_slots.campus_id', '=', $query_campus->id)
+                    ->pluck('hour_slot_student.hour_slot_id');
+
+
+                
+                foreach($wait_list as $book)
+                {
+                    
+                   $n= DB::table('hour_slot_student')
+                            ->where([
+                                'hour_slot_student.hour_slot_id'=> $book ,
+                                'hour_slot_student.attente' => true
+                            ])->count();
+                            
+                           
+
+                    if ($n < $query_campus->capacite){
+                        DB::table('hour_slot_student')
+                            ->where('hour_slot_student.student_id','=',$student)
+                            ->where('hour_slot_student.hour_slot_id','=',$book)
+                            ->update([
+                                'attente'=> false 
+                            ]);
+
+                       /* $user = Student::find($student);
+                        $book = HourSlot::find($book);
+                        $user->notify(new GetOutWaitListNotification($book));*/
+                            
+                    }
+                }
+            }
+        }
+        
+   }
+
     public function create_logic($week ,$d_o_w , $debut ,$classe_id )
     {
         $campus_id = DB::table('campuses')

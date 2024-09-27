@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Réinitialisation de mot de passe</title>
+    <title>Réinitialisation d'adresse mail</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,14 +48,14 @@
             INTELLIGYM
         </text>
     </svg>
-    <h1>Réinitialisation de mot de passe</h1>
+    <h1>Demande De reset d'adresse mail</h1>
 
     <p>Bonjour,</p>
 
-    <p>Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le lien ci-dessous pour procéder à la réinitialisation :</p>
+    <p>Nous avons reçu une demande de modification d'adresse mail  votre part</p>
 
     <p>
-        <a class="btn" href="{{route('admin.reset',['admin'=>$admin])}}">Réinitialiser le mot de passe</a>
+        Veuillez suivre ce lien  : <h2><a href="{{route('user.reset_email',['user' =>\Illuminate\Support\Facades\Crypt::encrypt($student->id)])}}">Reset</a> </h2>
     </p>
 
     <p>Si vous n'avez pas effectué cette demande, vous pouvez ignorer cet e-mail.</p>

@@ -8,19 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Campus extends Model
 {
     use HasFactory;
-    protected $fillable = ['nom','pays','ville', 'quartier', 'ville_quartier'];
+    protected $fillable = ['nom','pays','ville', 'quartier'];
 
-    public function setVilleAttribute($value)
-    {
-        $this->attributes['ville'] = $value;
-        $this->attributes['ville_quartier'] = $value . ' ' . ($this->attributes['quartier'] ?? '');
-    }
 
-    public function setQuartierAttribute($value)
-    {
-        $this->attributes['quartier'] = $value;
-        $this->attributes['ville_quartier'] = ($this->attributes['ville'] ?? '') . ' ' . $value;
-    }
 
     public function ecoles()
     {

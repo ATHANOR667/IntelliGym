@@ -13,82 +13,80 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/** ROUTES RESERVEES AUX USERS
+
+
+/** ROUTES RESERVEES A L'AUTHENTIFICATION ADMINISTRATEUR
  *
  *
- * USER: eleve d'une ecole du campus de titi garage
+ *
+ *
+ *
+ * PARTIE 1 ( ROUTES LIEES A L'AUTHENTIFICATION UTILISEES LORSQUE L'ADMINISTRATEUR N'EST PAS CONNECTE)
+ *
+ *
+ *
+ *
+ *
  * */
-Route::prefix('/')->controller(\App\Http\Controllers\UserController::class)->name('user.')->group(function (){
-    /** ACCEUIL */
-    Route::get('/','accueil_guest')->name('accueil_guest');
-    Route::get('/accueil-{student}','accueil')->name('accueil');
+Route::controller(\App\Http\Controllers\AuhtController::class)
+    ->name('admin.')->group(function (){
 
-    /** ABOUT */
-    Route::get('/about','about')->name('about');
+        /**
+         *  SIGNIN
+         *
+         */
 
-    /**  EmailCheck
-     *
-     * on verifie que l'email est valie en lui envoyant un email avec le lien pour l'inscription
-     * */
-    Route::get('/email-check','email_check')->name('mailcheck');
-    Route::post('/email-check','email_check_process')->name('mailcheck');
+        Route::get('/otp_request_signin','otp_request_signin')->name('otp_request_signin');
+        Route::post('/otp_request_signin','otp_request_signin_process')->name('otp_request_signin');
+        Route::get('/signin','signin')->name('signin');
+        Route::post('/signin','signin_process')->name('signin');
 
 
-    /**  SIGNIN
-     *
-     * page d'inscription (dans les faits on comparera les informations entrees avec celles
-     *                     renseignees par le ou les admins de l'ecole afin de verifier l'appartennance a l'ecole)
-     * */
-    Route::get('/signin','student_signin')->name('signin');
-    Route::post('/signin','student_signin_process')->name('signin_process');
+        /** LOGIN
+         *
+         */
 
-    /**  LOGIN
-     *
-     * l'eleve enregistre prealablement par un admin de son ecole et ayant confirme son identite  en ajoutant au
-     * passage son mote de passe entrera ses informations de connection
-     * */
-    Route::get('/login','student_login')->name('login');
-    Route::post('/login','student_login_process')->name('login_process');
+        Route::get('/','login')->name('login');
+        Route::post('/','login_process')->name('login_process');
 
-    /** LOGOUT
-     *
-     *l'eleve se desconnecte
-     *
-     */
-    Route::delete('/logout','logout')->name('logout');
-
-
-    /** RESET PASSWORD
-     *
-     *
-     */
-    Route::get('/reset-init','reset_init')->name('reset_init');
-    Route::post('/reset-init','reset_init_exec')->name('reset_init_process');
-    Route::get('/reset-{student}','reset')->name('reset');
-    Route::post('/reset-{student}','reset_process')->name('reset_process');
-
-
-    /** BOOKING L'ELEVE PEUT RESERVER OU ANNULER UN RESERVATION
-     *
-     *
-     */
-    Route::get('/booking-{student}','booking')->name('booking');
-    Route::post('/booking-{student}','booking_process')->name('booking');
-
-    /** PROFIL
-     *
-     *
-     */
-    Route::get('/profil-{student}','profil')->name('profil');
+        /** LOGOUT
+         *
+         */
+        Route::delete('/logout','logout')->name('logout');
 
 
 
+        /** PASSWORD-RESET-WHILE-IS-NOT-CONNECTED
+         *
+         * (modifier le mot de passse sans etre connecte)
+         */
+        Route::get('/password_reset_init_while_disconnected','password_reset_init_while_disconnected')->name('password_reset_init_while_disconnected');
+        Route::post('/password_reset_init_while_disconnected','password_reset_init_while_disconnected_process')->name('password_reset_init_while_disconnected');
+        Route::get('/password_reset_while_disconnected','password_reset_while_disconnected')->name('password_reset_while_disconnected');
+        Route::post('/password_reset_while_disconnected','password_reset_process_while_disconnected')->name('password_reset_while_disconnected');
 
 
-});
+
+        /** PASSWORD-RESET-WHILE-IS-CONNECTED
+         *
+         * (modifier lemot de passse etant deja connecte)
+         */
+        Route::get('/password_reset_init-{admin}', 'password_reset_init')->name('password_reset_init');
+        Route::get('/password_reset-{admin}', 'password_reset')->name('password_reset');
+        Route::post('/password_reset-{admin}', 'password_reset_process')->name('password_reset');
 
 
+        /** EMAIL - RESET
+         *
+         * (pour modifier l'adresse mail associee au compte  )
+         */
+        Route::get('/email_reset_otp_request-{admin}', 'email_reset_otp_request')->name('email_reset_otp_request');
+        Route::post('/email_reset_otp_request-{admin}', 'email_reset_otp_request_process')->name('email_reset_otp_request');
+        Route::get('/email_reset-{admin}', 'email_reset')->name('email_reset');
+        Route::post('/email_reset-{admin}', 'email_reset_process')->name('email_reset');
 
+
+    });
 
 
 /** ROUTES RESERVEES AUX ADMINISTRATEURS
@@ -96,46 +94,11 @@ Route::prefix('/')->controller(\App\Http\Controllers\UserController::class)->nam
  *
  *ADMINISTRATION: membre de l'administration de l'ecole en charge de fournir les programmes
  * */
-Route::prefix('/aaa')->controller(\App\Http\Controllers\AdminController::class)->name('admin.')->group(function (){
+Route::controller(\App\Http\Controllers\AdminController::class)
+    ->name('admin.')
+    ->middleware('auth:admin')
+    ->group(function (){
 
-
-    /**CHECKMAIL
-     *
-     */
-
-    Route::get('/checkmail','admin_checkmail')->name('checkmail');
-    Route::post('/checkmail','admin_checkmail_process')->name('checkmail_process');
-
-    /** SIGNIN
-     *
-     *
-     */
-
-    Route::get('/admin_signin','admin_signin')->name('signin');
-    Route::post('/admin_signin','admin_signin_process')->name('signin_process');
-
-    /** LOGIN
-     *
-     */
-
-    Route::get('/','admin_login')->name('login');
-    Route::post('/','admin_login_process')->name('login_process');
-
-    /** LOGOUT
-     *
-     *
-     */
-    Route::delete('/admin-logout','admin_logout')->name('logout');
-
-    /** PASSWORD RESET
-     *
-     *
-     */
-
-    Route::get('/admin-reset-init','admin_reset_init')->name('reset_init');
-    Route::post('/admin-reset-init','admin_reset_init_exec')->name('reset_init_process');
-    Route::get('/admin-reset-{admin}','admin_reset')->name('reset');
-    Route::post('/admin-reset-{admin}','admin_reset_process')->name('reset_process');
 
     /** ACCEUIL
      *
@@ -143,9 +106,15 @@ Route::prefix('/aaa')->controller(\App\Http\Controllers\AdminController::class)-
      */
     Route::get('/accueil-{admin}','accueil')->name('accueil');
 
+    /** ACCEUIL
+     *
+     *
+     */
+     Route::get('/profil-{admin}','profil')->name('profil');
 
 
-    /** ADD STUDENT
+
+        /** ADD STUDENT
      *
      * route redirigeant vers le formulaire d'ajout d'eleves
      */
@@ -169,6 +138,14 @@ Route::prefix('/aaa')->controller(\App\Http\Controllers\AdminController::class)-
     Route::get('/add-hour-slot-{admin}','hour_slot')->name('hour_slot');
     Route::post('/add-hour-slot-{admin}','hour_slot')->name('hour_slot');
 
+      /** BOOK - LIST
+     *
+     *route redirigeant vers la page affichant la liste des etudiants ayant reserve une seance
+     */
+
+     Route::get('/booking-list-{admin}','list')->name('list');
+     Route::post('/booking-list-{admin}','list')->name('list');
+
     /**DASHBOARD
      *
      * route redirigeant vers le tableau de bord affichant les statisti
@@ -178,3 +155,30 @@ Route::prefix('/aaa')->controller(\App\Http\Controllers\AdminController::class)-
 
 
 });
+
+
+
+/** ROUTES RESERVEES A LA MODIFICATION DES IDENTIFIANTS DES UTILISTEURS
+ **
+ *
+ *
+ *
+ *
+ * */
+Route::controller(\App\Http\Controllers\AuhtController::class)
+    ->prefix('/user')
+    ->name('user.')->group(function (){
+
+
+        Route::get('/success-{user}', 'success')->name('success');
+
+
+        /** PASSWORD-RESET-WHILE-IS-CONNECTED
+         *
+         * (modifier lemot de passse etant deja connecte)
+         */
+        Route::get('/reset_password-{user}', 'password_reset_user')->name('password_reset');
+        Route::post('/reset_password-{user}', 'password_reset_user_process')->name('password_reset');
+
+    });
+

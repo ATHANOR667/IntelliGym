@@ -1,188 +1,296 @@
-API Laravel - Guide d'utilisation
-Ce document fournit un guide d'utilisation pour interagir avec l'API Laravel. 
-L'API offre plusieurs fonctionnalités,  l'envoi d'OTP, l'inscription, la connexion et la gestion des réservations.
+# API Laravel - Guide d'Utilisation
 
+Ce document fournit un guide détaillé pour interagir avec l'API Laravel, qui propose plusieurs fonctionnalités telles que l'envoi d'OTP, l'inscription, la connexion, et la gestion des réservations.
 
-/***********************************************************************************************************************/
-///////**********************************Route otp_request*******************************/
-/**********************************************************************************************************/
-Cette route permet de demander l'envoi d'un OTP (One-Time Password) pour un email donné.
+---
 
-Méthode HTTP: POST
-Endpoint: /otp_request
+# ROUTES LIEES A L'AUTHENTIFIATION ET A LA MOFDIFICATION DES IDENTIFIANTS
 
-Paramètres de la requête:
-email: L'adresse e-mail de l'utilisateur.
+---
 
-Réponses:
-Code 200: OTP envoyé avec succès.
-Code 400: Différents messages en fonction de l'erreur interne ou si l'utilisateur est déjà inscrit.
+## Route `otp-request`
 
+Cette route permet de demander l'envoi d'un OTP (One-Time Password) à un email donné.
 
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/otp-request`
 
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
 
+### Réponses:
+- `200`: OTP envoyé avec succès.
+- `400`: Erreurs variées, notamment si l'utilisateur est déjà inscrit.
 
+---
 
-/***********************************************************************************************************************/
-///////**********************************Route otp_validate *******************************/
-/**********************************************************************************************************/
+## Route `otp-validate`
+
 Cette route permet de valider un OTP pour un email donné.
 
-Méthode HTTP: POST
-Endpoint: /otp_validate
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/otp-validate`
 
-Paramètres de la requête:
-email: L'adresse e-mail de l'utilisateur.
-otp: Le One-Time Password à valider.
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
+- `otp`: Le One-Time Password à valider.
 
-Réponses:Messages différents selon la validité de l'OTP renseigné.
+### Réponses:
+Différents messages en fonction de la validité de l'OTP.
 
+---
 
+## Route `register`
 
+Cette route permet à un utilisateur de s'inscrire en fournissant un email, un matricule, et un mot de passe.
 
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/register`
 
-/***********************************************************************************************************************/
-///////**********************************Route register*******************************/
-/**********************************************************************************************************/
-Cette route permet à un utilisateur de s'inscrire en fournissant un email, un matricule et un mot de passe.
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
+- `matricule`: Le matricule de l'utilisateur.
+- `password`: Le mot de passe de l'utilisateur.
 
-Méthode HTTP: POST
-Endpoint: /register
+### Réponses:
+Messages de succès ou d'erreur selon le résultat de l'inscription.
 
+---
 
-Paramètres de la requête:
-email: L'adresse e-mail de l'utilisateur.
-matricule: Le matricule de l'utilisateur.
-password: Le mot de passe de l'utilisateur.
-Réponses:
-Message différent en fonction du succès ou de l'échec de l'inscription.
+## Route `password reset while disconnected`
 
+Cette route permet a un utilisateur non connecte d'initier la reinitialisation de son mot de passe.
 
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/password-reset-while-disconnected`
 
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
 
+### Réponses:
+Messages de succès ou d'erreur selon le résultat de l'envoi d'email.
 
-/***********************************************************************************************************************/
-///////**********************************Route login*******************************/
-/**********************************************************************************************************/
+---
+
+## Route `login`
+
 Cette route permet à un utilisateur de se connecter en fournissant un email et un mot de passe.
 
-Méthode HTTP: POST
-Endpoint: /login
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/login`
 
-Paramètres de la requête:
-email: L'adresse e-mail de l'utilisateur.
-password: Le mot de passe de l'utilisateur.
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
+- `password`: Le mot de passe de l'utilisateur.
 
-Réponses:
-Code 200 avec les données utilisateur et un token de connexion en cas de succès.
-Code 403 avec un message approprié en cas d'erreur (utilisateur non trouvé ou mot de passe incorrect).
+### Réponses:
+- `200`: Détails de l'utilisateur et token de connexion en cas de succès.
+- `403`: Erreur en cas d'échec (utilisateur non trouvé ou mot de passe incorrect).
+
+---
+
+
+## Route `password reset `
+
+Cette route permet a un utilisateur  connecte d'initier la reinitialisation de son mot de passe.
+
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/password-reset-while-disconnected`
+
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
+
+### Réponses:
+Messages de succès ou d'erreur selon le résultat de l'envoi d'email.
 
 
 
+---
+
+## Route `email-reset-init`
+
+Cette route permet de demander l'envoi d'un OTP (One-Time Password) pour confirmer la nouvelle addresse.
+
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/email-reset-init`
+
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
+
+### Réponses:
+- `200`: OTP envoyé avec succès.
+- `400`: Erreurs variées, notamment si l'adresse est la meme que l'adresse actuelle.
+
+---
+
+## Route `email-reset`
+
+Cette route permet de valider un OTP pour confirmer la modification de l'email associee au compte.
+
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/email-reset`
+
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'utilisateur.
+- `otp`: Le One-Time Password à valider.
+
+### Réponses:
+Différents messages en fonction de la validité de l'OTP.
 
 
-/***********************************************************************************************************************/
-///////**********************************Route booking_params*******************************/
-/**********************************************************************************************************/
+---
+
+#  ROUTES LIEES AUX RESERVATIONS ET A L'HISTORIQUE 
+
+---
+
+## Route `booking_params`
+
 Cette route permet d'obtenir les paramètres de réservation pour une semaine donnée.
 
-Méthode HTTP: POST
-Endpoint: /booking_params
 
-Paramètres de la requête:
-semaine: Le numéro de la semaine pour laquelle effectuer la requête.
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/booking_params`
 
+### Paramètres de la requête:
+- `semaine`: Le numéro de la semaine pour laquelle obtenir les paramètres.
 
-En-tête:
-Authorization: Token de connexion précédemment retourné. "Bearer token(gjjgvjhvhjgvhjgvjhvjh)"
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
 
-Réponses:
-La semaine, la limite, les heures réservables, les heures non réservables et les heures réservées.
+### Réponses:
+ 3 listes vont s'afficher :
+-  -  celle des seances deja reservees 
+    ( attente de niveau 1 est due au fait que l'utilisateur a deja une seance cette semaine la )
 
+-  -  celle des seances reservables (elle inclut les seances reservees)
 
+- -  celle des seances non reservables 
+     (il y a actuellement un bug donc elle est vide . 
+         Apres corrrectif elle afichera les heures non reservables avec le motif de non reservabilite )
+- NB : la liste des seances reservables inclut les seances deja reservees
+       **Tous ces tableau varient au gres des reservation et des desirs de l'administration et 
+              doivent donc etre regulierement actualisees )**
+---
 
+## Route `booking_process`
 
+Cette route gère le processus de réservation.
 
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/booking_process`
 
-/***********************************************************************************************************************/
-///////**********************************Route booking_process*******************************/
-/**********************************************************************************************************/
-Cette route permet de gérer le processus de réservation.
+### Paramètres de la requête:
+- `semaine`: Le numéro de la semaine concernée.
+- `add`: Tableau des heures à réserver.
+- `delete`: Tableau des réservations à annuler.
+- (nb : meme si l'un est vide , les 2  tableaux doivent etre soumis )
 
-Méthode HTTP: POST
-Endpoint: /booking_process
-Paramètres de la requête:
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
 
-semaine: Le numéro de la semaine pour laquelle effectuer la requête.
-add: Tableau des heures à réserver.
-delete: Tableau des réservations à annuler.
+### Réponses:
+Elle retoure les listes actualisees en cas de success 
+ou un message pour signaler que l'on ne peut faire 2 reservations le meme jour 
+---
 
+## Route `histo`
 
-En-tête:
-Authorization: Token de connexion précédemment retourné. "Bearer token(gjjgvjhvhjgvhjgvjhvjh)"
+Cette route permet d'obtenir l'historique exclusif de ses reservations de l'utilisateur connecte 
 
-Réponses:
-La semaine, la limite, les heures réservables, les heures non réservables et les heures réservées.
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/histo`
 
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
 
+### Réponses:
+- Liste de seances reservees 
 
-Utilisez ces routes avec les méthodes HTTP appropriées et les paramètres requis pour interagir avec l'API et accéder à ses fonctionnalités.
-Assurez-vous d'inclure les en-têtes nécessaires, notamment pour l'authentification avec le token retourné lors de la connexion.
-Pour toute question ou assistance supplémentaire, veuillez vous référer à la documentation de l'API ou contacter le support technique.
+---
 
+## Route `data`
 
+Cette route permet d'obtenir les informations de l'utilisateur connecte
 
-/********************************************************************************************************************************************************/
-/***********************************************************************************************************************************************************/
-/******************************INSTALLATION DES DEPENDANCES ET DEMARAGE DU PROJET **************************************************************/
-/***************************************************************************************************************************************/
-/**********************************************************************************************************************************************************************/
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/data`
 
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
 
-
-
-
-Installation des dépendances :
-
-Accédez au répertoire du projet cloné via le terminal.
-Exécutez la commande composer install pour installer les dépendances PHP.
-Configuration de l'environnement :
-
-Dupliquez le fichier .env.example et renommez-le en .env.
-Configurez votre base de données dans le fichier .env.
-
-
-configurez egalement votre smtp pour simuler l'envoi des mails dans le fichier .env 
-
-
-Générez une nouvelle clé d'application en utilisant la commande php artisan key:generate.
-Exécution des migrations 
-/******************************IMPORTANT**************************************************************/
-/*******************************************************************************************************************/
-/*************************************************************************************************************************************/
-Exécutez les migrations pour créer les tables de base de données avec la commande php artisan migrate--path=chemin.
-avec respectivement les chemins des fichiers de migrations 
-hour_slot
-free_hour
-student 
-admin
-puis executer le reste des migrations avec php artisan migrate
-
-/************************************************IMPORTANT*****************************************************************************/
-/*******************************************************************************************************************/
-/*******************************************************************************************************************/
-
-EXECUTER LA COMMANDE PHP ARTISAN SCHEDULE:WORK PUIS ARRETER SON EXECUTION APRES LE PREMIER SUCCCESS 
-elle va executer les taches chron hebdomadaires necessaires au bon fonctionnement du projet 
+### Réponses:
+- Donnees sur l'utilisateur 
 
 
 
-Lancement du serveur de développement :
+---
 
-Utilisez la commande php artisan serve pour démarrer le serveur de développement.
-Vous devriez voir un message confirmant que le serveur est en cours d'exécution, généralement sur http://localhost:8000.
-Accéder à l'application dans le navigateur :
+#   ROUTES LIEES A LA TABLETTE 
 
-Ouvrez votre navigateur Web et accédez à l'URL fournie par le serveur de développement (par défaut, http://localhost:8000).
-#   I n t e l l i G y m  
- 
+---
+
+
+## Route `tab-capmus-set`
+
+Cette route affecte a la tablette le campus de l'admin qui entre ses identifiants.
+
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/tab/campus-set`
+
+### Paramètres de la requête:
+- `email`: L'adresse e-mail de l'un des administrateurs d'une ecole du campus.
+- `password`: Le mot de passe de l'un des administrateurs d'une ecole du campus.
+
+
+### Réponses:
+Message de sccess ou d'erreur 
+
+
+
+## Route `tab-list`
+
+Cette route affiche les etudiant ayant fait une reservation pour la seance ciblee
+
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/tab/list`
+
+### Paramètres de la requête:
+- `semaine` : numero de la semain dans l'annee (1...10...34..)
+- `d_o_w` :jour de la semaine ( lundi , mardi ...)
+- `debut`: heure de debut de la seance ciblee
+- `annee`: anneee en cours 
+- `campus_id ` :id du campus  (obtenu par la route precedente)
+
+
+### Réponses:
+Liste d'etudiants
+
+
+---
+
+#     Installation des dépendances et démarrage du projet
+
+---
+### Installation des dépendances :
+
+1. Accédez au répertoire du projet via le terminal.
+2. Exécutez la commande `composer install` pour installer les dépendances PHP.
+
+### Configuration de l'environnement :
+
+1. Dupliquez le fichier `.env.example` et renommez-le en `.env`.
+2. Configurez la base de données dans le fichier `.env`.
+3. Configurez également le SMTP pour l'envoi des mails dans le fichier `.env`.
+
+### Génération de la clé d'application :
+Exécutez la commande suivante pour générer une nouvelle clé d'application :
+
+- **php artisan key:generate**
+- les parametres de la bd si necessaire (sqlite par defaut)
+- faites **php artisan migrate** pour migrer la BD
+- faites **php artisan db:seed** pour initier les parametres par defaut
+- faites **php artisan schedule:work** pour executer les taches chron hebdomadaires necessaires au bon fonctionnement du projet 
+
+
+

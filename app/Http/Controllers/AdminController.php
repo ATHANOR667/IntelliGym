@@ -18,9 +18,62 @@ class AdminController extends AuhtController
 
     function accueil( $admin)
     {
-        return view('admin.accueil')->with(['admin_key'=>$admin]);
+        return view('admin.pages.accueil')->with(['admin_key'=>$admin]);
     }
 
+
+    /**
+     * ROUTE PERMETANT D'AFFICHER LA LISTE DES ETUDIANTS AYANT RESERVE UNE SEANCE
+     *
+     *
+     */
+    function list( $admin)
+    {
+        try {
+            $admin = Crypt::decrypt($admin);
+        }catch (\Exception $e){
+            return $e;
+        }
+        $admin = Admin::find($admin);
+        if (!$admin) {
+            return 'ERROR 404';
+        }
+        $admin = $admin[0] == null ? $admin : $admin[0];
+        $admin_key = Crypt::encrypt($admin);
+
+        $classes = new Ecole();
+        $classes= $classes->classes_by_admin_ecole($admin->id);
+
+
+        return(view('admin.pages.list',['admin'=>$admin, 'admin_key'=>$admin_key,'classes'=>$classes]));
+    }
+
+    /**
+     *   PROFIL
+     *
+     */
+
+    public function profil($admin)
+    {
+
+        try {
+            $admin = Crypt::decrypt($admin);
+        }catch (\Exception $e){
+            return $e;
+        }
+        $admin = Admin::find($admin);
+        if (!$admin) {
+            return 'ERROR 404';
+        }
+        $admin = $admin[0] == null ? $admin : $admin[0];
+        $admin_key = Crypt::encrypt($admin);
+
+        return view('admin.pages.profil', [
+            'admin'=>$admin,
+            'admin_key'=>$admin_key
+        ]);
+
+    }
     function add_student( $admin)
     {
         try {
@@ -39,7 +92,7 @@ class AdminController extends AuhtController
         $classes= $classes->classes_by_admin_ecole($admin->id);
 
 
-        return(view('admin.add_student',['admin'=>$admin, 'admin_key'=>$admin_key,'classes'=>$classes]));
+        return(view('admin.pages.add_student',['admin'=>$admin, 'admin_key'=>$admin_key,'classes'=>$classes]));
     }
     function add_student_process(AdminCreateStudentRequest $request,  $admin)
     {
@@ -55,9 +108,10 @@ class AdminController extends AuhtController
         $admin = $admin[0] == null ? $admin : $admin[0];
         $student = $request->validated();
 
+
         Student::create([
             'classe_id' => $student['classe'],
-            'ecole' => $admin->ecole,
+            //'ecole' => $admin->ecole,
             'matricule' => $student['matricule'],
             'nom' => $student['nom'],
             'prenom' => $student['prenom'],
@@ -100,26 +154,11 @@ class AdminController extends AuhtController
         }
 
         $admin_key =Crypt::encrypt($admin);
-        return view('admin.add_free_hour',[
+        return view('admin.pages.add_free_hour',[
             'admin'=>$admin,
             'admin_key'=> $admin_key
         ]);
 
-    }
-    function  add_free_hour_process( $admin, Request $request)
-    {
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
-        $admin = Admin::find($admin);
-        if (!$admin) {
-            return 'ERROR 404';
-        }
-        $admin_key = Crypt::encrypt($admin);
-
-        return redirect(route('admin.add_free_hour',['admin'=>$admin_key]));
     }
 
 
@@ -143,25 +182,11 @@ class AdminController extends AuhtController
         }
 
         $admin_key =Crypt::encrypt($admin);
-        return view('admin.add_hour_slot',[
+        return view('admin.pages.add_hour_slot',[
             'admin'=>$admin,
             'admin_key'=> $admin_key
         ]);
 
     }
-    function  hour_slot_process( $admin, Request $request)
-    {
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
-        $admin = Admin::find($admin);
-        if (!$admin) {
-            return 'ERROR 404';
-        }
-        $admin_key = Crypt::encrypt($admin);
 
-        return redirect(route('admin.add_hour_slot',['admin'=>$admin,'admin_key'=>$admin_key]));
-    }
 }

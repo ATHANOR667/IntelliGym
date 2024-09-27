@@ -25,7 +25,7 @@ class AdminLoginRequest extends FormRequest
     {
         return [
             'email' => 'required',
-            'password' => '',
+            'password' => 'required',
             //'password' => 'min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
         ];
     }

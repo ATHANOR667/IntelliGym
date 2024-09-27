@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->string('pays');
             $table->string('ville');
-            $table->string('quartier')->unique();
-            $table->string('ville_quartier');
+            $table->string('quartier');
             $table->integer('capacite');
             $table->timestamps();
         });

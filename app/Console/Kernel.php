@@ -17,13 +17,11 @@ class Kernel extends ConsoleKernel
      */
 
 
-    public function create_hour_slot_logic(){}
-
-
     protected function schedule(Schedule $schedule): void
     {
 
         $schedule->call(function () {
+            (new HourSlot())->wait_list_put_out();
             $query = HourSlot::query();
             $w = Carbon::now()->weekOfYear;
             $past_week = $query->where('semaine','=',$w-1);$past_week = [$past_week->get(),$w-1];
@@ -143,11 +141,16 @@ class Kernel extends ConsoleKernel
 
                         }
 
+                    
+
                     }
                 }
             }
+
+        
         })->everyFifteenSeconds();
     }
+
 
     /**
      * Register the commands for the application.
@@ -158,4 +161,5 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+       
 }

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentLoginRequest extends FormRequest
+class AdminSigninOtpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,9 @@ class StudentLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email'=>'required',
-            'password' => 'required',
-            //'password' => 'min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
+            'matricule' => ['required'],
+            'email' => ['required', 'email'],
         ];
     }
+
 }

@@ -228,6 +228,12 @@ class HourSlot extends Component
         $query->where('debut','=',$debut);
         $query->update(['delete'=>false,'admin_id'=>$this->admin->id]);
 
+        $campus = DB::table('campuses')
+                ->join('ecoles','campuses.id','=','ecoles.campus_id')
+                ->join('admins','admins.ecole_id','=','ecoles.id')
+                ->where('admins.id','=',$this->admin->id)
+                ->first('campuses.*');
+
         //si elle n'existe pas on la cree
         if ($query->update(['delete'=>false]) == 0 ){
             \App\Models\HourSlot::create([
@@ -243,6 +249,7 @@ class HourSlot extends Component
                 'ecole'=>$this->admin->ecole ,
                 'delete'=>false,
                 'full'=>false,
+                'campus_id' => $campus->id ,
                 'admin_id'=>$this->admin->id
             ]);
         }

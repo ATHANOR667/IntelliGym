@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('adherant');
             $table->boolean('active');
             $table->boolean('delete');
-            $table->string('password')->unique()->nullable();
+            $table->string('password')->nullable();
             $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
@@ -36,6 +36,8 @@ return new class extends Migration
             $table->primary(['hour_slot_id','student_id']);
             $table->boolean('annulation');
             $table->boolean('presence');
+            $table->boolean('attente');
+            $table->integer('niveau_attente');
 
         });
 

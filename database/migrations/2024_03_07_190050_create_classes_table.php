@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('niveau');
             $table->string('numero')->nullable();
-            $table->string('c_d_s');
+            $table->string('c_d_s')->nullable();
             $table->string('specialite');
             $table->timestamps();
         });
@@ -25,11 +25,11 @@ return new class extends Migration
         });
 
         Schema::table('hour_slots',function (Blueprint $table){
-            $table->foreignIdFor(\App\Models\Classe::class)->constrained();
+            $table->foreignIdFor(\App\Models\Classe::class)->constrained()->cascadeOnDelete();
         });
 
         Schema::table('free_hours',function (Blueprint $table){
-            $table->foreignIdFor(\App\Models\Classe::class)->constrained();
+            $table->foreignIdFor(\App\Models\Classe::class)->constrained()->cascadeOnDelete();
         });
     }
 

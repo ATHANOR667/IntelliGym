@@ -157,7 +157,40 @@ class Booking extends Component
             'delete'=>false,
         ])->get();
 
-        //dd($slots);
+         // Entités des séances de la journée de la séance souhaitée pour les différentes classes
+         $slots_jour = \App\Models\HourSlot::where([
+            'date' => $date->format('Y') . '-' . $date->format('m') . '-' . $d_o_w,
+            'semaine' => $this->semaine,
+            'campus_id' => $this->campus,
+            'delete' => false,
+        ])->get();
+        
+        // On vérifie que l'étudiant n'a pas déjà une séance dans la journée
+        $deja = false; // Initialisation de la variable booleenne
+        
+        foreach($slots_jour as $slot_jour){
+            $exist = DB::table('hour_slot_student')
+                ->where('hour_slot_student.hour_slot_id', '=', $slot_jour->id)
+                ->where('hour_slot_student.student_id', '=', $this->student->id)
+                ->where('hour_slot_student.annulation', '=', 0)
+                ->first();
+        
+            if($exist != null){
+                $deja = true;
+                break; // On peut arrêter la boucle dès qu'on trouve une réservation existante
+            }
+        }
+        
+        if($deja){
+            /*return response()->json([
+                'message'=>'vous avez deja une reservation cette semaine',
+            ]);*/
+            exit; // Sortir si l'étudiant a déjà une séance réservée
+            
+        }
+        
+        // Code pour continuer la réservation si l'étudiant n'a pas déjà de séance
+        
 
         foreach ($slots as $slot){
             $query = DB::table('hour_slot_student');
@@ -597,17 +630,25 @@ class Booking extends Component
 
     /** FONCTION DETERMINANT LES HEURES RESERVABLES EN FONCTION DE LA LOGIQUE PRECEDMENT ENONCEE */
     public  function BookableHourSet(){
-            if(!$this->class->c_d_s){
+            if(!$this->class->c_d_s)
+            {
                 $ids = [36,37,38,39,40,41,48,7,14,21,28,35,42,49,6,13,20,27,34];
                 foreach ($ids as $id){
                     $this->BookableHour[] = $id;
                 }
 
-            }elseif ($this->class->c_d_s){
+            }elseif ($this->class->c_d_s)
+            {
                 $ids = [1,2,3,4,5,8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,41,48,7,14,21,28,35,42,49] ;
                 foreach ($ids as $id){
                     $this->BookableHour[] = $id;
                 }
+            }elseif($this->class->c_d_s == null)
+            {
+                $ids = [1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20,22,23,24,25,26,27,29,30,31,32,33,34,36,37,38,39,40,41,43,44,45,46,47,48,7,14,21,28,35,42,49] ;
+                foreach ($ids as $id){
+                    $this->BookableHour[] = $id;
+                }  
             }
         //retirer les heures supprimees par l'administration
         $lundi =  Carbon::now()->setISODate(Carbon::now()->year, $this->semaine)->isoWeekday(1)->day ;
