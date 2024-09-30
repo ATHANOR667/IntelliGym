@@ -190,8 +190,36 @@ Cette route gère le processus de réservation.
 - `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
 
 ### Réponses:
-Elle retoure les listes actualisees en cas de success 
-ou un message pour signaler que l'on ne peut faire 2 reservations le meme jour 
+Elle retoure les listes actualisees en cas de success
+ou un message pour signaler que l'on ne peut faire 2 reservations le meme jour
+
+---
+
+## Fonctionnement du système de  liste d'attente de réservation actuel
+
+### 1. Validation automatique de la réservation :
+Une réservation est automatiquement validée si elle est la première de la semaine pour l'utilisateur qui la réalise.  
+Dans ce cas, les paramètres suivants sont définis :
+- **Attente** : 0
+- **Niveau d'attente** : 0
+
+### 2. Placement sur liste d'attente :
+Si la réservation n'est pas la première de la semaine pour cet utilisateur, il sera placé sur une liste d'attente.  
+Dans ce cas, les paramètres suivants sont appliqués :
+- **Attente** : 1
+- **Niveau d'attente** : 1
+
+L'utilisateur restera en attente jusqu'à 24 heures avant la séance. À ce moment-là, en fonction de sa position sur la liste d'attente et du nombre de places restantes, sa réservation passera de :
+- **Attente** : 1
+- **Niveau d'attente** : 1  
+  à :
+- **Attente** : 0
+- **Niveau d'attente** : 0
+
+### 3. Indicateurs de réservation :
+Les variables **"réservations validées"** et **"réservations en attente"** permettent à l'utilisateur de connaître sa position sur la liste d'attente.
+ 
+
 ---
 
 ## Route `histo`
@@ -221,6 +249,63 @@ Cette route permet d'obtenir les informations de l'utilisateur connecte
 
 ### Réponses:
 - Donnees sur l'utilisateur 
+
+
+
+---
+
+#  ROUTES LIEES AUX NOTIFICATIONS 
+
+---
+
+
+
+## Route `notifications`
+
+Cette route permet de récupérer toutes les notifications de l'utilisateur connecté.
+
+- **Méthode HTTP**: `GET`
+- **Endpoint**: `/notifications`
+
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
+
+### Réponses:
+- Une liste des notifications (lues et non lues) de l'utilisateur connecté.
+
+---
+
+## Route `notifications/unread`
+
+Cette route permet de récupérer uniquement les notifications non lues de l'utilisateur connecté.
+
+- **Méthode HTTP**: `GET`
+- **Endpoint**: `/notifications/unread`
+
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
+
+### Réponses:
+- Une liste des notifications non lues de l'utilisateur connecté.
+
+---
+
+## Route `notifications/{id}/read`
+
+Cette route permet de marquer une notification spécifique comme lue.
+
+- **Méthode HTTP**: `POST`
+- **Endpoint**: `/notifications/{id}/read`
+
+### En-tête:
+- `Authorization`: Token de connexion. Exemple: `Bearer token(gjjgvjhvhjgvhjgvjhvjh)`.
+
+### Paramètres:
+- `id`: L'ID de la notification à marquer comme lue.
+
+### Réponses:
+- Confirmation que la notification a été marquée comme lue.
+- Si la notification n'est pas trouvée, un message d'erreur sera renvoyé.
 
 
 

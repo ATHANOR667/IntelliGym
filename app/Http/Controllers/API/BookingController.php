@@ -30,6 +30,7 @@ class BookingController extends Controller
 
     }
 
+
     public function histo()
     {
         $this->student = \auth()->user();
