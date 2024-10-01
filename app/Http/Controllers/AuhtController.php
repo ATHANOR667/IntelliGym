@@ -51,7 +51,11 @@ class AuhtController extends Controller
             $matricule = $request->input('matricule');
 
             // on cherche l'admin avec firstorfail pour declencher une exception si le matricule est inconnu
-            $admin = Admin::where('matricule', $request->input('matricule'))->firstOrFail();
+            $admin = Admin::where('matricule', $request->input('matricule'))->first();
+
+            if ($admin->email !== null){
+                return redirect()->route('admin.otp_request_signin')->with(['message' => 'Deja inscrit ....................................................................................']);
+            }
 
             // Vérifier si l'utilisateur doit attendre avant de retenter
             if (session()->has('last_email_sent_time')) {
@@ -79,7 +83,7 @@ class AuhtController extends Controller
                 return redirect()->route('admin.otp_request_signin')->with(['message' => 'Une erreur s\'est produite lors de l\'envoi de l\'e-mail. Veuillez réessayer.']);
             }
         }catch (\Exception $e){
-            return redirect()->route('admin.otp_request_signin')->with(['message' => 'Matricule incorrect ....................................................................................']);
+            return redirect()->route('admin.otp_request_signin')->with(['message' => 'Matricule inconnu ....................................................................................']);
         }
     }
 

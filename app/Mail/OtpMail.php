@@ -24,14 +24,26 @@ class OtpMail extends Mailable
     }
 
     /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            view: 'Mail.otp',
+            with: [
+                'otp'=> $this->otp
+            ]
+        );
+    }
+
+    /**
      * Build the message.
      *
      * @return $this
      */
     public function build()
     {
-        return $this
-            ->subject('OTP Mail')
+        return $this->subject('OTP Mail')
             ->view('Mail.otp', [
                 'otp' => $this->otp,
             ]);
