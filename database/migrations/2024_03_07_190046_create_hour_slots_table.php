@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('mois');
             $table->string('annee');
             $table->integer('semaine');
-            $table->date('debut');
-            $table->date('fin');
-            $table->date('date');
+            $table->string('debut');
+            $table->string('fin');
+            $table->string('date');
             $table->boolean('delete');
             $table->boolean('full');
             $table->timestamps();
