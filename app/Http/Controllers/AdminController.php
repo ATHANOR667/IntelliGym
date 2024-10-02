@@ -10,6 +10,7 @@ use App\Models\HourSlot;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +35,7 @@ class AdminController extends AuhtController
         }catch (\Exception $e){
             return $e;
         }
-        $admin = Admin::find($admin);
+        $admin = Auth::guard('admin')->user();
         if (!$admin) {
             return 'ERROR 404';
         }
@@ -61,7 +62,7 @@ class AdminController extends AuhtController
         }catch (\Exception $e){
             return $e;
         }
-        $admin = Admin::find($admin);
+        $admin = Auth::guard('admin')->user();
         if (!$admin) {
             return 'ERROR 404';
         }
@@ -81,7 +82,7 @@ class AdminController extends AuhtController
         }catch (\Exception $e){
             return $e;
         }
-        $admin = Admin::find($admin);
+        $admin = Auth::guard('admin')->user();
         if (!$admin) {
             return 'ERROR 404';
         }
@@ -101,7 +102,7 @@ class AdminController extends AuhtController
         }catch (\Exception $e){
             return $e;
         }
-        $admin = Admin::find($admin);
+        $admin = Auth::guard('admin')->user();
         if (!$admin) {
             return 'error 404 ';
         }
@@ -148,7 +149,7 @@ class AdminController extends AuhtController
         }catch (\Exception $e){
             return $e;
         }
-        $admin = Admin::find($admin);
+        $admin = Auth::guard('admin')->user();
         if (!$admin) {
             return 'ERROR 404';
         }
@@ -176,7 +177,7 @@ class AdminController extends AuhtController
             return $e;
         }
 
-        $admin = Admin::find($admin);
+        $admin = Auth::guard('admin')->user();
         if (!$admin) {
             return 'ERROR 404';
         }
