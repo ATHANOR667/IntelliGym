@@ -24,6 +24,16 @@ class OtpMail extends Mailable
     }
 
     /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'OTP Mail'
+        );
+    }
+
+    /**
      * Get the message content definition.
      */
     public function content(): Content
@@ -31,21 +41,8 @@ class OtpMail extends Mailable
         return new Content(
             view: 'Mail.otp',
             with: [
-                'otp'=> $this->otp
+                'otp' => $this->otp
             ]
         );
-    }
-
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
-    public function build()
-    {
-        return $this->subject('OTP Mail')
-            ->view('Mail.otp', [
-                'otp' => $this->otp,
-            ]);
     }
 }

@@ -54,7 +54,9 @@ class AuhtController extends Controller
             $admin = Admin::where('matricule', $request->input('matricule'))->first();
 
             if ($admin->email !== null){
-                return redirect()->route('admin.otp_request_signin')->with(['message' => 'Deja inscrit ....................................................................................']);
+                return redirect()->route('admin.otp_request_signin')->with([
+                    'message' => 'Deja inscrit ....................................................................................'
+                ]);
             }
 
             // Vérifier si l'utilisateur doit attendre avant de retenter
