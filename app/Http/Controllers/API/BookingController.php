@@ -18,7 +18,8 @@ class BookingController extends Controller
     public $semaine ;
     public $BookableHour ;
     public $BookedHour;
-    public $NoBookableHour =[] ;
+    public $NoBookableHour ;
+    public $NoBookableHourPre ;
     public $limit ;
     public $campus ;
     public $deja ;
@@ -69,6 +70,7 @@ class BookingController extends Controller
         }
 
         return response()->json([
+            'status_code' => '200',
             'historique des reservations' => $books
         ]);
 
@@ -79,6 +81,7 @@ class BookingController extends Controller
         // on cherche
         $this->set_free();
         $this->BookableHourSet();
+        $this->NoBookableHourPreSet();
         $this->NoBookableHourSet() ;
         $this->BookedHourSet();
         //$this->BookableHour = array_diff($this->BookableHour, $this->BookedHour);
@@ -94,6 +97,7 @@ class BookingController extends Controller
 
 
         return response()->json([
+            'status_code' => '200',
             'semaine'=>$this->semaine,
             'limit'=>$this->limit,
             'bookable'=>$this->BookableHour,
@@ -115,6 +119,7 @@ class BookingController extends Controller
 
         $this->set_free();
         $this->BookableHourSet();
+        $this->NoBookableHourPreSet();
         $this->NoBookableHourSet() ;
         $this->BookedHourSet();
         //$this->BookableHour = array_diff($this->BookableHour, $this->BookedHour);
@@ -136,6 +141,7 @@ class BookingController extends Controller
             ], 400);
         }else{
             return response()->json([
+                'status_code' => '200',
                 'semaine'=>$this->semaine,
                 'limit'=>$this->limit,
                 'bookable'=>$this->BookableHour,
@@ -380,7 +386,9 @@ class BookingController extends Controller
         }
     }
     /**
+     *
      *ON CHERCHE POU CHAQUE SEANCE RESERVABLE LE NOMBRE DE PLACES DEJA PRISE
+     *
      */
 
     public function rest_logic($d_o_w , $fin , $id ){
@@ -432,7 +440,6 @@ class BookingController extends Controller
                     'mois'=> $slot->mois ,
                     'semaine' => $slot->semaine ,
                     'd_o_w' => $slot->d_o_w ,
-                    'jour'=>$slot->jour ,
                     'debut'=> $slot->debut,
                     'fin'=> $slot->fin ,
                     'reservations validee' => $nb_reservations_validee  ,
@@ -442,14 +449,11 @@ class BookingController extends Controller
         }
     }
 
-    /** LOGIQUE DE RESERVABILITE D'UNE HEURE :
-     *
-     * ON RECHERCHE LA  SEANCE DESIREE
-     *ON VERIFIE QU'ELLE N'EST PAS SUPPRIMEE (SOFT ) ET QUE DES PLACES ONT ENCORE DISPONIBLE
+
+    /**
+     *FONCTION INTERNE POUR SAVOIR SI UNE SEANCE EST DEJA PASSEE
      *
      */
-
-
     public function is_past($slot)
     {
         // Obtenir la date actuelle
@@ -461,6 +465,13 @@ class BookingController extends Controller
         // Vérifier si le créneau est déjà passé
         return $slotDateTime->isPast();
     }
+
+    /** LOGIQUE DE RESERVABILITE D'UNE HEURE :
+     *
+     * ON RECHERCHE LA  SEANCE DESIREE
+     *ON VERIFIE QU'ELLE N'EST PAS SUPPRIMEE (SOFT ) ET QUE DES PLACES ONT ENCORE DISPONIBLE
+     *
+     */
 
 
      public function BookableHourSet_logic($d_o_w , $fin,$id)
@@ -491,16 +502,51 @@ class BookingController extends Controller
          }
      }
 
+     /**
+      *LOGIQUE PREPARATOIRE DE DETERMINATION DE NON RESERVABILITE D'UNE SEANCE
+      *
+      * (ON RETIRE JUSTE LES SEANCES QUI SONT DEJA PASSEES )
+      *
+      */
+    public function NoBookableHourPreSet_logic($d_o_w , $fin,$id)
+    {
+        $this->student = \auth()->user();
+
+        $date = Carbon::now()->setISODate(Carbon::now()->year, $this->semaine);
+
+        $slot = \App\Models\HourSlot::where([
+            'date'=> $date->format('Y').'-'.$date->format('m').'-'.$d_o_w,
+            'semaine'=> $this->semaine,
+            'fin' => $fin ,
+            'classe_id'=> $this->student->classe_id,
+        ])->first();
+
+        if($slot != null){
+            if($this->is_past($slot)){
+                if (($key = array_search( $id, $this->NoBookableHourPre)) !== false) {
+                    unset($this->NoBookableHourPre[$key]);
+                    $this->NoBookableHourPre = array_values($this->NoBookableHourPre);
+                }
+            }
+        }
+    }
+
+    /**
+     *LOGIQUE  DE DETERMINATION DE NON RESERVABILITE D'UNE SEANCE
+     *
+     * (AYANT DEJA RETIRE LES  SEANCES QUI SONT DEJA PASSEES ,
+     *  ON S'INTERRESSE A 3 MOTIFS DE NON RESERVABILITE :
+     *  1 -  LA SEANCE N'EXISTE PAS : SALLE FERMEE
+     *  2 - LA SEANCE A ETE SUPPRIMEE PAR UN ADMIN
+     *  3 - LA SEANCE EST FULL
+     * )
+     *
+     */
      public function NoBookableHourSet_logic($d_o_w, $fin, $id)
     {
         $date = Carbon::now()->setISODate(Carbon::now()->year, $this->semaine);
-        $lundi =  Carbon::now()->setISODate(Carbon::now()->year, $this->semaine)->isoWeekday(1)->day ;$mardi = $lundi+1; $mercredi = $lundi+2;$jeudi = $lundi+3;$vendredi = $lundi+4;$samedi =$lundi+5;$dimanche = $lundi+6;
-        $jours = ['lundi' => $lundi, 'mardi' => $mardi, 'mercredi' => $mercredi, 'jeudi' => $jeudi, 'vendredi' => $vendredi, 'samedi' => $samedi, 'dimanche' => $dimanche];
-
-
         $this->student = \auth()->user();
 
-        // Trouver la date pour le jour de la semaine donné dans la semaine spécifiée
 
         // Rechercher le créneau horaire correspondant
         $slot = \App\Models\HourSlot::where([
@@ -511,32 +557,7 @@ class BookingController extends Controller
             'classe_id'=> $this->student->classe_id,
         ])->first();
 
-
-         // Vérifier si le créneau est complet
-         if ($slot != null && $this->is_full($slot->id)) {
-            $this->NoBookableHour[] = [
-                'annee' => $slot->annee,
-                'mois' => $slot->mois,
-                'semaine' => $slot->semaine,
-                'd_o_w' => $slot->d_o_w,
-                'jour' => $slot->jour,
-                'debut' => $slot->debut,
-                'fin' => $slot->fin,
-                'motif' => 'séance complète'
-            ];
-        }elseif ($slot != null && $slot->delete == true) {
-            // Vérifier si le créneau est marqué comme supprimé
-            $this->NoBookableHour[] = [
-                'annee' => $slot->annee,
-                'mois' => $slot->mois,
-                'semaine' => $slot->semaine,
-                'd_o_w' => $slot->d_o_w,
-                'jour' => $slot->jour,
-                'debut' => $slot->debut,
-                'fin' => $slot->fin,
-                'motif' => 'annulée par l\'administration'
-            ];
-        }elseif($slot == null) {
+        if($slot == null) {
 
             // Si aucun créneau trouvé, ajouter à NoBookableHour avec un motif de salle fermée
             $this->NoBookableHour[] = [
@@ -544,12 +565,44 @@ class BookingController extends Controller
                 'mois' => $date->format('F'),
                 'semaine' => $this->semaine,
                 'd_o_w' => $d_o_w,
-                'jour' => $date->day,
                 'debut' => $fin-2,
                 'fin' => $fin,
                 'motif' => 'salle fermée'
             ];
         }
+
+         // Vérifier si le créneau est complet
+         elseif ( $this->is_full($slot->id)) {
+            $this->NoBookableHour[] = [
+                'annee' => $slot->annee,
+                'mois' => $slot->mois,
+                'semaine' => $slot->semaine,
+                'd_o_w' => $slot->d_o_w,
+                'debut' => $slot->debut,
+                'fin' => $slot->fin,
+                'motif' => 'séance complète'
+            ];
+         }
+
+        elseif ($slot->delete) {
+            // Vérifier si le créneau est marqué comme supprimé
+            $this->NoBookableHour[] = [
+                'annee' => $slot->annee,
+                'mois' => $slot->mois,
+                'semaine' => $slot->semaine,
+                'd_o_w' => $slot->d_o_w,
+                'debut' => $slot->debut,
+                'fin' => $slot->fin,
+                'motif' => 'annulée par l\'administration'
+            ];
+
+
+        }
+
+
+
+       // $this->NoBookableHour = array_values($this->NoBookableHour);
+
     }
 
 
@@ -896,6 +949,13 @@ class BookingController extends Controller
                 $this->BookableHour[] = $id;
             }
         }
+
+        elseif ($this->class->c_d_s == null){
+            $ids = [1,2,3,4,5,8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,41,48,7,14,21,28,35,42,49,36,37,38,39,40,41,48,7,14,21,28,35,42,49,6,13,20,27,34] ;
+            foreach ($ids as $id){
+                $this->NoBookableHourPre[] = $id;
+            }
+        }
         //retirer les heures supprimees par l'administration
         $lundi =  Carbon::now()->setISODate(Carbon::now()->year, $this->semaine)->isoWeekday(1)->day ;
         $mardi = $lundi+1; $mercredi = $lundi+2;$jeudi = $lundi+3;$vendredi = $lundi+4;$samedi=$lundi+5;$dimanche=$lundi+6;
@@ -1052,13 +1112,190 @@ class BookingController extends Controller
         }
     }
 
+    /** FONCTION PREPARATOIRE DE  DETERMINATION DES HEURES NON RESERVABLES EN FONCTION DE LA LOGIQUE PRECEDMENT ENONCEE */
+    public  function NoBookableHourPreSet(){
+        $this->student = \auth()->user();
+        $this->class = Classe::find($this->student->classe_id);
+        if(!$this->class->c_d_s){
+            $ids = [36,37,38,39,40,41,48,7,14,21,28,35,42,49,6,13,20,27,34];
+            foreach ($ids as $id){
+                $this->NoBookableHourPre[] = $id;
+            }
+
+        }elseif ($this->class->c_d_s){
+            $ids = [1,2,3,4,5,8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,41,48,7,14,21,28,35,42,49] ;
+            foreach ($ids as $id){
+                $this->NoBookableHourPre[] = $id;
+            }
+        }elseif ($this->class->c_d_s == null){
+            $ids = [1,2,3,4,5,8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,41,48,7,14,21,28,35,42,49,36,37,38,39,40,41,48,7,14,21,28,35,42,49,6,13,20,27,34] ;
+            foreach ($ids as $id){
+                $this->NoBookableHourPre[] = $id;
+            }
+        }
+        //retirer les heures supprimees par l'administration
+        $lundi =  Carbon::now()->setISODate(Carbon::now()->year, $this->semaine)->isoWeekday(1)->day ;
+        $mardi = $lundi+1; $mercredi = $lundi+2;$jeudi = $lundi+3;$vendredi = $lundi+4;$samedi=$lundi+5;$dimanche=$lundi+6;
+        foreach ($this->NoBookableHourPre as $h){
+            switch ($h){
+                case 1 :
+                    $this->NoBookableHourPreSet_logic($lundi,10,1);
+                    break;
+                case 2 :
+                    $this->NoBookableHourPreSet_logic($mardi,10,2);
+                    break;
+                case 3 :
+                    $this->NoBookableHourPreSet_logic($mercredi,10,3);
+                    break;
+                case 4 :
+                    $this->NoBookableHourPreSet_logic($jeudi,10,4);
+                    break;
+                case 5 :
+                    $this->NoBookableHourPreSet_logic($vendredi,10,5);
+                    break;
+                case 6 :
+                    $this->NoBookableHourPreSet_logic($samedi,10,6);
+                    break;
+                case 7 :
+                    $this->NoBookableHourPreSet_logic($dimanche,10,7);
+                    break;
+                case 8 :
+                    $this->NoBookableHourPreSet_logic($lundi,12,8);
+                    break;
+                case 9 :
+                    $this->NoBookableHourPreSet_logic($mardi,12,9);
+                    break;
+                case  10:
+                    $this->NoBookableHourPreSet_logic($mercredi,12,10);
+                    break;
+                case 11 :
+                    $this->NoBookableHourPreSet_logic($jeudi,12,11);
+                    break;
+                case 12 :
+                    $this->NoBookableHourPreSet_logic($vendredi,12,12);
+                    break;
+                case 13 :
+                    $this->NoBookableHourPreSet_logic($samedi,12,13);
+                    break;
+                case 14 :
+                    $this->NoBookableHourPreSet_logic($dimanche,12,14);
+                    break;
+                case 15 :
+                    $this->NoBookableHourPreSet_logic($lundi,14,15);
+                    break;
+                case 16 :
+                    $this->NoBookableHourPreSet_logic($mardi,14,16);
+                    break;
+                case 17 :
+                    $this->NoBookableHourPreSet_logic($mercredi,14,17);
+                    break;
+                case 18 :
+                    $this->NoBookableHourPreSet_logic($jeudi,14,18);
+                    break;
+                case 19 :
+                    $this->NoBookableHourPreSet_logic($vendredi,14,19);
+                    break;
+                case 20 :
+                    $this->NoBookableHourPreSet_logic($samedi,14,20);
+                    break;
+                case 21 :
+                    $this->NoBookableHourPreSet_logic($dimanche,14,21);
+                    break;
+                case 22 :
+                    $this->NoBookableHourPreSet_logic($lundi,16,22);
+                    break;
+                case 23 :
+                    $this->NoBookableHourPreSet_logic($mardi,16,23);
+                    break;
+                case 24 :
+                    $this->NoBookableHourPreSet_logic($mercredi,16,24);
+                    break;
+                case  25:
+                    $this->NoBookableHourPreSet_logic($jeudi,16,25);
+                    break;
+                case 26 :
+                    $this->NoBookableHourPreSet_logic($vendredi,16,26);
+                    break;
+                case 27 :
+                    $this->NoBookableHourPreSet_logic($samedi,16,27);
+                    break;
+                case 28 :
+                    $this->NoBookableHourPreSet_logic($dimanche,16,28);
+                    break;
+                case 29 :
+                    $this->NoBookableHourPreSet_logic($lundi,18,29);
+                    break;
+                case 30 :
+                    $this->NoBookableHourPreSet_logic($mardi,18,30);
+                    break;
+                case 31 :
+                    $this->NoBookableHourPreSet_logic($mercredi,18,31);
+                    break;
+                case 32 :
+                    $this->NoBookableHourPreSet_logic($jeudi,18,32);
+                    break;
+                case 33 :
+                    $this->NoBookableHourPreSet_logic($vendredi,18,33);
+                    break;
+                case 34 :
+                    $this->NoBookableHourPreSet_logic($samedi,18,34);
+                    break;
+                case 35 :
+                    $this->NoBookableHourPreSet_logic($dimanche,18,35);
+                    break;
+                case 36 :
+                    $this->NoBookableHourPreSet_logic($lundi,20,36);
+                    break;
+                case 37 :
+                    $this->NoBookableHourPreSet_logic($mardi,20,37);
+                    break;
+                case 38 :
+                    $this->NoBookableHourPreSet_logic($mercredi,20,38);
+                    break;
+                case 39:
+                    $this->NoBookableHourPreSet_logic($jeudi,20,39);
+                    break;
+                case 40 :
+                    $this->NoBookableHourPreSet_logic($vendredi,20,40);
+                    break;
+                case 41 :
+                    $this->NoBookableHourPreSet_logic($samedi,20,41);
+                    break;
+                case 42 :
+                    $this->NoBookableHourPreSet_logic($dimanche,20,42);
+                    break;
+                case 43 :
+                    $this->NoBookableHourPreSet_logic($lundi,22,43);
+                    break;
+                case 44 :
+                    $this->NoBookableHourPreSet_logic($mardi,22,44);
+                    break;
+                case 45 :
+                    $this->NoBookableHourPreSet_logic($mercredi,22,45);
+                    break;
+                case 46 :
+                    $this->NoBookableHourPreSet_logic($jeudi,22,46);
+                    break;
+                case 47 :
+                    $this->NoBookableHourPreSet_logic($vendredi,22,47);
+                    break;
+                case 48 :
+                    $this->NoBookableHourPreSet_logic($samedi,22,48);
+                    break;
+                case 49 :
+                    $this->NoBookableHourPreSet_logic($dimanche,22,49);
+                    break;
+            }
+        }
+    }
+
 
 
     /** FONCTION DETERMINANT LES HEURES NON RESERVABLES EN FONCTION DE LA LOGIQUE PRECEDMENT ENONCEE */
     public  function NoBookableHourSet(){
 
         //retirer les heures supprimees par l'administration
-        foreach ($this->BookableHour as $h){
+        foreach ($this->NoBookableHourPre as $h){
             switch ($h){
 
                 case 1 :
@@ -1226,109 +1463,6 @@ class BookingController extends Controller
             ->get();
 
             $this->BookedHour= $books;
-
-
-        /*foreach ($books as $book){
-            if($book->d_o_w == 'lundi' && $book->debut == 8){
-                $this->BookedHour[]= 1;
-            }elseif ($book->d_o_w == 'lundi' && $book->debut == 10){
-                $this->BookedHour[]= 8;
-            }elseif ($book->d_o_w == 'lundi' && $book->debut == 12){
-                $this->BookedHour[]= 15;
-            }elseif ($book->d_o_w == 'lundi' && $book->debut == 14){
-                $this->BookedHour[] =22;
-            }elseif ($book->d_o_w == 'lundi' && $book->debut == 16){
-                $this->BookedHour[]= 29;
-            }elseif ($book->d_o_w == 'lundi' && $book->debut == 18){
-                $this->BookedHour[]= 36;
-            }elseif ($book->d_o_w == 'lundi' && $book->debut == 20){
-                $this->BookedHour[]= 43;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 8){
-                $this->BookedHour[]= 2;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 10){
-                $this->BookedHour[]= 9;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 12){
-                $this->BookedHour[]= 16;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 14){
-                $this->BookedHour[]= 23;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 16){
-                $this->BookedHour[]= 30;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 18){
-                $this->BookedHour[]= 37;
-            }elseif ($book->d_o_w == 'mardi' && $book->debut == 20){
-                $this->BookedHour[]= 44;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 8){
-                $this->BookedHour[]= 3;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 10){
-                $this->BookedHour[]= 10;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 12){
-                $this->BookedHour[]= 17;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 14){
-                $this->BookedHour[]= 24;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 16){
-                $this->BookedHour[]= 31;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 18){
-                $this->BookedHour[]= 38;
-            }elseif ($book->d_o_w == 'mercredi' && $book->debut == 20){
-                $this->BookedHour[]= 44;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 8){
-                $this->BookedHour[]= 4;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 10){
-                $this->BookedHour[]= 11;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 12){
-                $this->BookedHour[]= 18;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 14){
-                $this->BookedHour[]= 25;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 16){
-                $this->BookedHour[]= 32;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 18){
-                $this->BookedHour[]= 39;
-            }elseif ($book->d_o_w == 'jeudi' && $book->debut == 20){
-                $this->BookedHour[]= 46;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 8){
-                $this->BookedHour[]= 5;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 10){
-                $this->BookedHour[]= 12;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 12){
-                $this->BookedHour[]= 19;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 14){
-                $this->BookedHour[]= 26;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 16){
-                $this->BookedHour[]= 33;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 18){
-                $this->BookedHour[]= 40;
-            }elseif ($book->d_o_w == 'vendredi' && $book->debut == 20){
-                $this->BookedHour[]= 47;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 8){
-                $this->BookedHour[]= 6;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 10){
-                $this->BookedHour[]= 13;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 12){
-                $this->BookedHour[] = 20;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 14){
-                $this->BookedHour[] = 27;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 16){
-                $this->BookedHour[]= 34;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 18){
-                $this->BookedHour[]= 41;
-            }elseif ($book->d_o_w == 'samedi' && $book->debut == 20){
-                $this->BookedHour[]= 48;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 8){
-                $this->BookedHour[] = 7;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 10){
-                $this->BookedHour[] = 14;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 12){
-                $this->BookedHour[] = 21;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 14){
-                $this->BookedHour[] = 28;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 16){
-                $this->BookedHour[]= 35;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 18){
-                $this->BookedHour[]= 42;
-            }elseif ($book->d_o_w == 'dimanche' && $book->debut == 20){
-                $this->BookedHour[] = 49;
-            }
-        }*/
 
     }
 
@@ -1587,5 +1721,8 @@ class BookingController extends Controller
             }
         }
     }
+
+
+
 }
 
