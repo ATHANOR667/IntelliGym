@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 class AdminController extends AuhtController
 {
 
-    function accueil( $admin)
+    function accueil( string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View
     {
         return view('admin.pages.accueil')->with(['admin_key'=>$admin]);
     }
@@ -28,19 +28,10 @@ class AdminController extends AuhtController
      *
      *
      */
-    function list( $admin)
+    function list( string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View
     {
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
+        $admin_key = $admin;
         $admin = Auth::guard('admin')->user();
-        if (!$admin) {
-            return 'ERROR 404';
-        }
-        $admin = $admin[0] == null ? $admin : $admin[0];
-        $admin_key = Crypt::encrypt($admin);
 
         $classes = new Ecole();
         $classes= $classes->classes_by_admin_ecole($admin->id);
@@ -54,20 +45,10 @@ class AdminController extends AuhtController
      *
      */
 
-    public function profil($admin)
+    public function profil(string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View
     {
-
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
+        $admin_key = $admin;
         $admin = Auth::guard('admin')->user();
-        if (!$admin) {
-            return 'ERROR 404';
-        }
-        $admin = $admin[0] == null ? $admin : $admin[0];
-        $admin_key = Crypt::encrypt($admin);
 
         return view('admin.pages.profil', [
             'admin'=>$admin,
@@ -75,19 +56,11 @@ class AdminController extends AuhtController
         ]);
 
     }
-    function add_student( $admin)
+    function add_student( string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View
     {
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
+
+        $admin_key = $admin ;
         $admin = Auth::guard('admin')->user();
-        if (!$admin) {
-            return 'ERROR 404';
-        }
-        $admin = $admin[0] == null ? $admin : $admin[0];
-        $admin_key = Crypt::encrypt($admin);
 
         $classes = new Ecole();
         $classes= $classes->classes_by_admin_ecole($admin->id);
@@ -95,36 +68,27 @@ class AdminController extends AuhtController
 
         return(view('admin.pages.add_student',['admin'=>$admin, 'admin_key'=>$admin_key,'classes'=>$classes]));
     }
-    function add_student_process(AdminCreateStudentRequest $request,  $admin)
+    function add_student_process(AdminCreateStudentRequest $request,  string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\Foundation\Application
     {
         try {
-            $admin = Crypt::decrypt($admin);
+            $student = $request->validated();
+            $admin_key = $admin  ;
+            $admin = Auth::guard('admin')->user();
+            Student::create([
+                'classe_id' => $student['classe'],
+                'matricule' => $student['matricule'],
+                'nom' => $student['nom'],
+                'prenom' => $student['prenom'],
+                'date_naiss' => $student['date_naiss'],
+                'sexe' => $student['sexe'],
+                'adherant'=>false ,
+                'delete'=>false,
+                'active'=>false,
+                'admin_id'=>$admin->id
+            ]);
         }catch (\Exception $e){
-            return $e;
+            return 'ERROR 404';
         }
-        $admin = Auth::guard('admin')->user();
-        if (!$admin) {
-            return 'error 404 ';
-        }
-        $admin = $admin[0] == null ? $admin : $admin[0];
-        $student = $request->validated();
-
-
-        Student::create([
-            'classe_id' => $student['classe'],
-            //'ecole' => $admin->ecole,
-            'matricule' => $student['matricule'],
-            'nom' => $student['nom'],
-            'prenom' => $student['prenom'],
-            'date_naiss' => $student['date_naiss'],
-            'sexe' => $student['sexe'],
-            'adherant'=>false ,
-            'delete'=>false,
-            'active'=>false,
-            'admin_id'=>$admin->id
-        ]);
-
-        $admin_key = Crypt::encrypt($admin);
 
 
         return redirect(route('admin.add_student',['admin'=>$admin_key]))->with(['message' => 'Élève enregistré']);
@@ -142,19 +106,11 @@ class AdminController extends AuhtController
      *
      *
      */
-    function add_free_hour( $admin)
+    function add_free_hour( string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View
     {
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
+        $admin_key =$admin;
         $admin = Auth::guard('admin')->user();
-        if (!$admin) {
-            return 'ERROR 404';
-        }
 
-        $admin_key =Crypt::encrypt($admin);
         return view('admin.pages.add_free_hour',[
             'admin'=>$admin,
             'admin_key'=> $admin_key
@@ -169,20 +125,11 @@ class AdminController extends AuhtController
      *
      */
 
-    function hour_slot( $admin )
+    function hour_slot( string $admin) :\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View
     {
-        try {
-            $admin = Crypt::decrypt($admin);
-        }catch (\Exception $e){
-            return $e;
-        }
-
+        $admin_key = $admin;
         $admin = Auth::guard('admin')->user();
-        if (!$admin) {
-            return 'ERROR 404';
-        }
 
-        $admin_key =Crypt::encrypt($admin);
         return view('admin.pages.add_hour_slot',[
             'admin'=>$admin,
             'admin_key'=> $admin_key

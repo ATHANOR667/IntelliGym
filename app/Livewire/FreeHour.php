@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Classe;
 use App\Models\Ecole;
+use App\Models\Student;
+use App\Notifications\GetOutWaitListNotification;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Support\Facades\DB;
@@ -196,6 +198,13 @@ class FreeHour extends Component
             DB::table('hour_slot_student')
                 ->where('hour_slot_id','=', $e->id)
                 ->update(['annulation' => false]);
+            /*if ($firstIteration) {
+                $user = Student::find($student);
+                $book = \App\Models\HourSlot::find($book);
+                $user->notify(new GetOutWaitListNotification($book));
+
+                $firstIteration = false;
+            }*/
         }
 
     }
@@ -240,6 +249,13 @@ class FreeHour extends Component
             DB::table('hour_slot_student')
                 ->where('hour_slot_id','=', $e->id)
                 ->update(['annulation' => true]);
+            /*if ($firstIteration) {
+                $user = Student::find($student);
+                $book = \App\Models\HourSlot::find($book);
+                $user->notify(new GetOutWaitListNotification($book));
+
+                $firstIteration = false;
+            }*/
         }
     }
 

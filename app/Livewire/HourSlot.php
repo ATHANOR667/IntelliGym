@@ -258,6 +258,13 @@ class HourSlot extends Component
         DB::table('hour_slot_student')
             ->where('hour_slot_id','=', $Id[0]->id)
             ->update(['annulation' => false]);
+        /*if ($firstIteration) {
+                $user = Student::find($student);
+                $book = \App\Models\HourSlot::find($book);
+                $user->notify(new GetOutWaitListNotification($book));
+
+                $firstIteration = false;
+            }*/
     }
 
     /** LOGIQUE DE SUPRESSION D'UNE SEANCE ET D'ANNULATION DES RESERVATIONS ASSOCIEES */
@@ -276,6 +283,14 @@ class HourSlot extends Component
         DB::table('hour_slot_student')
             ->where('hour_slot_id','=', $Id[0]->id)
             ->update(['annulation' => true]);
+
+        /*if ($firstIteration) {
+                $user = Student::find($student);
+                $book = \App\Models\HourSlot::find($book);
+                $user->notify(new GetOutWaitListNotification($book));
+
+                $firstIteration = false;
+            }*/
     }
 
     public function add($selectedTimes)

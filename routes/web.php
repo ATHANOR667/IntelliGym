@@ -120,7 +120,7 @@ Route::controller(\App\Http\Controllers\AdminController::class)
      */
 
     Route::get('/add-student-{admin}','add_student')->name('add_student');
-    Route::post('/add-student-{admin}','add_student_process')->name('add_student_process');
+    Route::post('/add-student-{admin}','add_student_process')->name('add_student');
 
     /** ADD FREE HOURS
      *
@@ -128,7 +128,7 @@ Route::controller(\App\Http\Controllers\AdminController::class)
      */
 
     Route::get('/add-free-hour-{admin}','add_free_hour')->name('add_free_hour');
-    Route::post('/add-free-hour-{admin}','add_free_hour_process')->name('add_free_hour_process');
+    Route::post('/add-free-hour-{admin}','add_free_hour_process')->name('add_free_hour');
 
     /** ADD HOUR SLOT
      *
