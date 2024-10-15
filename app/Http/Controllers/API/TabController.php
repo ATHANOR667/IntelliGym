@@ -25,6 +25,8 @@ class TabController extends Controller
            ->where('hour_slots.debut', $request->debut)
            ->where('hour_slots.annee', $request->annee)
            ->where('hour_slots.campus_id', $request->campus_id)
+           ->where('hour_slot_student.annulation',0)
+           ->where('hour_slot_student.attente',0)
            ->distinct('hour_slot_student.student_id')
            ->get(['students.nom','students.prenom','classes.niveau','ecoles.nom as nom_ecole']);
 

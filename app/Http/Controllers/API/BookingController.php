@@ -63,6 +63,8 @@ class BookingController extends Controller
                     ->where('hour_slots.classe_id',$this->student->classe_id)
                     ->where('hour_slots.mois',$mois)
                     ->where('hour_slots.annee',$y)
+                    ->where('hour_slot_student.attente',0)
+                    ->where('hour_slot_student.annulation',0)
                     ->select( ['hour_slots.jour','hour_slots.mois','hour_slots.d_o_w','hour_slots.debut','hour_slot_student.annulation','hour_slot_student.presence','hour_slot_student.attente','hour_slot_student.niveau_attente'])
                     ->get();
                 $books[$y] = [$mois => $reservations_by_mois] ;

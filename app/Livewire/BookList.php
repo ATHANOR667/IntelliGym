@@ -81,6 +81,8 @@ class BookList extends Component
            ->where('hour_slots.fin', $fin)
            ->where('hour_slots.annee', $annee)
            ->where('hour_slots.campus_id', $this->campus_id)
+           ->where('hour_slot_student.attente',0)
+           ->where('hour_slot_student.annulation',0)
            ->distinct('hour_slot_student.student_id')
            ->get(['students.nom','students.prenom','classes.niveau','ecoles.nom as nom_ecole']);
 
