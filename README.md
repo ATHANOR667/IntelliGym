@@ -1,4 +1,4 @@
-# API Laravel - Guide d'Utilisation
+# API Intelligym - Guide d'Utilisation
 
 Ce document fournit un guide détaillé pour interagir avec l'API Laravel, qui propose plusieurs fonctionnalités telles que l'envoi d'OTP, l'inscription, la connexion, et la gestion des réservations.
 
